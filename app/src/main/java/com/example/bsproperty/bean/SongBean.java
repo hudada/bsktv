@@ -7,10 +7,13 @@ import java.util.List;
 public class SongBean implements Serializable {
 
     private Long id;
-    private String song_name;
-    private Long userid;
-    private int time;
-    private ArrayList<ReplyBean> replyBeans;
+    private Long uid;
+    private String name;
+    private String addr;
+    private Long length;
+    private int likeSum;  //赞
+    private String uname;
+    private boolean isLike;
 
     public Long getId() {
         return id;
@@ -20,35 +23,59 @@ public class SongBean implements Serializable {
         this.id = id;
     }
 
-    public String getSong_name() {
-        return song_name;
+    public Long getUid() {
+        return uid;
     }
 
-    public void setSong_name(String song_name) {
-        this.song_name = song_name;
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 
-    public Long getUserid() {
-        return userid;
+    public String getName() {
+        return name;
     }
 
-    public void setUserid(Long userid) {
-        this.userid = userid;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getTime() {
-        return time;
+    public String getAddr() {
+        return addr;
     }
 
-    public void setTime(int time) {
-        this.time = time;
+    public void setAddr(String addr) {
+        this.addr = addr;
     }
 
-    public ArrayList<ReplyBean> getReplyBeans() {
-        return replyBeans;
+    public Long getLength() {
+        return length;
     }
 
-    public void setReplyBeans(ArrayList<ReplyBean> replyBeans) {
-        this.replyBeans = replyBeans;
+    public void setLength(Long length) {
+        this.length = length;
+    }
+
+    public int getLikeSum() {
+        return likeSum;
+    }
+
+    public void setLikeSum(int likeSum) {
+        this.likeSum = likeSum;
+    }
+
+    public String getUname() {
+        return uname;
+    }
+
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+
+    public boolean isLike() {
+        return isLike;
+    }
+
+    public void setLike(boolean like) {
+        isLike = like;
     }
 }

@@ -57,21 +57,20 @@ public class LoginActivity extends BaseActivity {
                     showToast("请输入完整信息");
                     return;
                 }
-                startActivity(new Intent(mContext, UserMainActivity.class));
 
-//                OkHttpTools.sendPost(mContext, ApiManager.USER_LOGIN)
-//                        .addParams("name", user)
-//                        .addParams("pwd", pwd)
-//                        .build()
-//                        .execute(new BaseCallBack<UserObjBean>(mContext, UserObjBean.class) {
-//                            @Override
-//                            public void onResponse(UserObjBean userObjBean) {
-//                                SpUtils.setUserBean(mContext, userObjBean.getData());
-//                                MyApplication.getInstance().setUserBean(userObjBean.getData());
-//                                        startActivity(new Intent(mContext, UserMainActivity.class));
-//                                        finish();
-//                            }
-//                        });
+                OkHttpTools.sendPost(mContext, ApiManager.LOGIN)
+                        .addParams("name", user)
+                        .addParams("pwd", pwd)
+                        .build()
+                        .execute(new BaseCallBack<UserObjBean>(mContext, UserObjBean.class) {
+                            @Override
+                            public void onResponse(UserObjBean userObjBean) {
+                                SpUtils.setUserBean(mContext, userObjBean.getData());
+                                MyApplication.getInstance().setUserBean(userObjBean.getData());
+                                        startActivity(new Intent(mContext, UserMainActivity.class));
+                                        finish();
+                            }
+                        });
                 break;
             case R.id.btn_1:
                 jumpAct(RgActivity.class);

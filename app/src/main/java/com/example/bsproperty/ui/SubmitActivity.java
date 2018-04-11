@@ -2,8 +2,10 @@ package com.example.bsproperty.ui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -13,6 +15,10 @@ import android.widget.TextView;
 
 import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
+import com.example.bsproperty.bean.BaseResponse;
+import com.example.bsproperty.net.ApiManager;
+import com.example.bsproperty.net.BaseCallBack;
+import com.example.bsproperty.net.OkHttpTools;
 import com.example.bsproperty.utils.Player;
 
 import java.io.File;
@@ -43,9 +49,12 @@ public class SubmitActivity extends BaseActivity {
     private Player player;
     private int mProgress;
     private String mPath;
+    private MediaPlayer mediaPlayer;
+    private int length;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
+        tvTitle.setText("发布");
         sbBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -69,6 +78,7 @@ public class SubmitActivity extends BaseActivity {
             player = new Player(mPath, sbBar, new Player.OnPlayListener() {
                 @Override
                 public void onLoad(int duration) {
+                    length = duration;
                     tvTotal.setText(MyApplication.formatTime.format(duration));
                 }
 
@@ -87,6 +97,8 @@ public class SubmitActivity extends BaseActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        mediaPlayer = new MediaPlayer();
     }
 
     @Override
@@ -128,7 +140,19 @@ public class SubmitActivity extends BaseActivity {
                         .show();
                 break;
             case R.id.btn_play:
-                File file = new File(Environment.getExternalStorageDirectory() + "/record/test.mp3");
+                File file = new File(mPath);
+                OkHttpTools.postFile(mContext, ApiManager.SONG_ADD, "file", file)
+                        .addParams("uid", MyApplication.getInstance().getUserBean().getId() + "")
+                        .addParams("name", getIntent().getStringExtra("name"))
+                        .addParams("length", length + "")
+                        .build()
+                        .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
+                            @Override
+                            public void onResponse(BaseResponse baseResponse) {
+                                startActivity(new Intent(mContext, UserMainActivity.class));
+                                finish();
+                            }
+                        });
                 break;
         }
     }

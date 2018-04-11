@@ -52,17 +52,16 @@ public class RgActivity extends BaseActivity {
             showToast("请输入完整信息");
             return;
         }
-        String url = "";
-//        OkHttpTools.sendPost(mContext, url)
-//                .addParams("name", user)
-//                .addParams("pwd", pwd)
-//                .build()
-//                .execute(new BaseCallBack<UserObjBean>(mContext, UserObjBean.class) {
-//                    @Override
-//                    public void onResponse(UserObjBean userObjBean) {
-//                        showToast("注册成功");
-//                        finish();
-//                    }
-//                });
+        OkHttpTools.sendPost(mContext, ApiManager.REGISTER)
+                .addParams("name", user)
+                .addParams("pwd", pwd)
+                .build()
+                .execute(new BaseCallBack<UserObjBean>(mContext, UserObjBean.class) {
+                    @Override
+                    public void onResponse(UserObjBean userObjBean) {
+                        showToast("注册成功");
+                        finish();
+                    }
+                });
     }
 }

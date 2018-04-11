@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -15,9 +17,21 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
+import com.example.bsproperty.bean.MusicBean;
+import com.example.bsproperty.bean.MusicListBean;
+import com.example.bsproperty.bean.MusicObjBean;
+import com.example.bsproperty.net.ApiManager;
+import com.example.bsproperty.net.BaseCallBack;
+import com.example.bsproperty.net.OkHttpTools;
 import com.example.bsproperty.utils.DenstityUtils;
 import com.example.bsproperty.utils.LQRPhotoSelectUtils;
+import com.example.bsproperty.view.FileProgressDialog;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.FileCallBack;
+
+import java.io.File;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,6 +39,8 @@ import butterknife.OnClick;
 import kr.co.namee.permissiongen.PermissionFail;
 import kr.co.namee.permissiongen.PermissionGen;
 import kr.co.namee.permissiongen.PermissionSuccess;
+import okhttp3.Call;
+import okhttp3.Request;
 
 public class AccompanimentActivity extends BaseActivity {
 
@@ -40,10 +56,18 @@ public class AccompanimentActivity extends BaseActivity {
     LinearLayout llWeb;
 
     private LayoutInflater mInflater;
+    private FileProgressDialog dialog;
+    private MediaPlayer mediaPlayer;
+    private File selectFile;
+    private MusicBean downMusic;
+    private MusicBean selectMusic;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
+        tvTitle.setText("选择伴奏");
         mInflater = LayoutInflater.from(mContext);
+        dialog = new FileProgressDialog(mContext);
+        mediaPlayer = new MediaPlayer();
     }
 
     @Override
@@ -53,14 +77,28 @@ public class AccompanimentActivity extends BaseActivity {
 
     @Override
     protected void loadData() {
-        for (int i = 0; i < 3; i++) {
+        loadLocalData();
+
+        loadWebData();
+    }
+
+    private void loadLocalData() {
+        llMy.removeAllViews();
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/bsktv");
+        if (file == null || file.listFiles() == null || file.listFiles().length <= 0) {
+            return;
+        }
+        for (final File file1 : file.listFiles()) {
             View view = mInflater.inflate(R.layout.item_accom, null, true);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     DenstityUtils.dp2px(mContext, 50));
-            view.findViewById(R.id.rl_root).setTag(i);
+            ((TextView) view.findViewById(R.id.tv_name)).setText(file1.getName());
+
+            ((Button) view.findViewById(R.id.btn_act)).setText("演唱");
             view.findViewById(R.id.btn_act).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    selectFile = file1;
                     PermissionGen.with((Activity) mContext)
                             .addRequestCode(521)
                             .permissions(Manifest.permission.RECORD_AUDIO,
@@ -68,25 +106,106 @@ public class AccompanimentActivity extends BaseActivity {
                             ).request();
                 }
             });
+            try {
+                mediaPlayer.setDataSource(file1.getAbsolutePath());
+                mediaPlayer.prepare();
+                int time = mediaPlayer.getDuration();
+                ((TextView) view.findViewById(R.id.tv_time)).setText("时长：" +
+                        MyApplication.formatTime.format(time));
+                mediaPlayer.reset();
+
+            } catch (Exception e) {
+                ((TextView) view.findViewById(R.id.tv_time)).setText("");
+            }
             llMy.addView(view, params);
         }
+    }
 
-        for (int i = 0; i < 13; i++) {
-            View view = mInflater.inflate(R.layout.item_accom, null, true);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    DenstityUtils.dp2px(mContext, 50));
-            llWeb.addView(view, params);
-        }
+    private void loadWebData() {
+        OkHttpTools.sendPost(mContext, ApiManager.MUSIC_LIST)
+                .build()
+                .execute(new BaseCallBack<MusicListBean>(mContext, MusicListBean.class) {
+                    @Override
+                    public void onResponse(MusicListBean musicListBean) {
+                        for (final MusicBean musicBean : musicListBean.getData()) {
+                            View view = mInflater.inflate(R.layout.item_accom, null, true);
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                    DenstityUtils.dp2px(mContext, 50));
+                            ((TextView) view.findViewById(R.id.tv_name)).setText(musicBean.getName());
+                            ((TextView) view.findViewById(R.id.tv_time)).setText("时长：" + MyApplication.formatTime.format(musicBean.getLength()));
+                            ((Button) view.findViewById(R.id.btn_act)).setText("下载");
+                            view.findViewById(R.id.btn_act).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    downMusic = musicBean;
+                                    PermissionGen.with((Activity) mContext)
+                                            .addRequestCode(522)
+                                            .permissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                            ).request();
+                                }
+                            });
+                            llWeb.addView(view, params);
+                        }
+                    }
+                });
     }
 
     @PermissionSuccess(requestCode = 521)
     private void ok() {
-        Intent intent = new Intent(mContext, PlayActivity.class);
-        startActivity(intent);
+        String name = selectFile.getName();
+        try {
+            name = selectFile.getName().split("\\.")[0];
+        } catch (Exception e) {
+
+        }
+        OkHttpTools.sendPost(mContext, ApiManager.MUSIC_WORD)
+                .addParams("name", name)
+                .build()
+                .execute(new BaseCallBack<MusicObjBean>(mContext, MusicObjBean.class) {
+                    @Override
+                    public void onResponse(MusicObjBean musicObjBean) {
+                        Intent intent = new Intent(mContext, PlayActivity.class);
+                        intent.putExtra("word", musicObjBean.getData().getWord());
+                        intent.putExtra("file", selectFile);
+                        startActivity(intent);
+                    }
+                });
+    }
+
+    @PermissionSuccess(requestCode = 522)
+    private void ok1() {
+        OkHttpUtils.get().url(ApiManager.BZ_PATH + downMusic.getAddr())
+                .build()
+                .execute(new FileCallBack(
+                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/bsktv",
+                        downMusic.getName() + ".mp3") {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+
+                    }
+
+                    @Override
+                    public void onResponse(File response, int id) {
+                        dialog.dismiss();
+                        loadLocalData();
+                    }
+
+                    @Override
+                    public void inProgress(float progress, long total, int id) {
+                        super.inProgress(progress, total, id);
+                        dialog.setPor(progress);
+                    }
+                });
     }
 
     @PermissionFail(requestCode = 521)
     private void showTip1() {
+        showDialog();
+    }
+
+    @PermissionFail(requestCode = 522)
+    private void showTip2() {
         showDialog();
     }
 

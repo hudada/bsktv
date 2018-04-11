@@ -12,27 +12,31 @@ public class ApiManager {
     private static final String HOST = HTTP + IP + PROT;
     private static final String API = "/api";
     private static final String USER = "/user";
-    private static final String SHOP = "/shop";
-    private static final String PRODUCT = "/product";
-    private static final String ORDER = "/order";
-    private static final String APPLY = "/apply";
+    private static final String SONG = "/song";
+    private static final String MUSIC = "/music";
+    private static final String LIKE = "/like";
+    private static final String COMMENT = "/comment";
 
-    public static final String IMAGE = HOST + API + PRODUCT;
+    public static final String MP3_PATH = HOST + API + SONG;
+    public static final String BZ_PATH = HOST + API + MUSIC;
 
-    public static final String USER_RG = HOST + API + USER + "/";
-    public static final String USER_LOGIN = HOST + API + USER + "/login";
-    public static final String USER_CHANGE = HOST + API + USER + "/change/";
+    public static final String REGISTER = HOST + API + USER + "/register";
+    public static final String LOGIN = HOST + API + USER + "/login";
+    public static final String MY_SONG = HOST + API + USER + "/";
 
-    public static final String SHOP_LIST = HOST + API + SHOP + "/list";
-    public static final String SHOP_INFO = HOST + API + SHOP + "/";
-    public static final String SHOP_ADD = HOST + API + SHOP + "/add";
+    public static final String SONG_LIST = HOST + API + SONG + "/list";
+    public static final String SONG_ADD = HOST + API + SONG + "/add";
+    public static final String SONG_ISZAN = HOST + API + SONG + "/iszan";
+    public static final String SONG_DOLIKE = HOST + API + SONG + "/dolike";
 
-    public static final String PRODUCT_ADD = HOST + API + PRODUCT + "/add";
+    public static final String MUSIC_LIST = HOST + API + MUSIC + "/list";
+    public static final String MUSIC_WORD = HOST + API + MUSIC + "/word";
 
-    public static final String ORDER_ADD = HOST + API + ORDER + "/add";
-    public static final String ORDER_LIST = HOST + API + ORDER + "/list";
+    public static final String LIKE_ADD = HOST + API + LIKE + "/add";
+    public static final String LIKE_FIND = HOST + API + LIKE + "/find";
+    public static final String LIKE_DEL = HOST + API + LIKE + "/del";
+    public static final String LIKE_LIST = HOST + API + LIKE + "/list";
 
-    public static final String APPLY_ADD = HOST + API + APPLY + "/add";
-    public static final String APPLY_LIST = HOST + API + APPLY + "/list";
-    public static final String APPLY_CHANGE = HOST + API + APPLY + "/change";
+    public static final String COMMENT_LIST = HOST + API + COMMENT + "/list";
+    public static final String COMMENT_ADD = HOST + API + COMMENT + "/add";
 }

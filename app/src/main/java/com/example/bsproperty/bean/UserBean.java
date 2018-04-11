@@ -32,5 +32,4 @@ public class UserBean {
     public void setPwd(String pwd) {
         this.pwd = pwd;
     }
-
 }

@@ -37,21 +37,16 @@ public class UserFragment03 extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        tvName.setText(MyApplication.getInstance().getUserBean().getUserName());
-
     }
 
     @Override
     protected void loadData() {
-//        tvName.setText(MyApplication.getInstance().getUserBean().getUserName());
-
+        tvName.setText(MyApplication.getInstance().getUserBean().getUserName());
     }
 
     @Override
     protected void initView(Bundle savedInstanceState) {
         tvTitle.setText("我的");
-        btnRight.setVisibility(View.VISIBLE);
-        btnRight.setText("修改信息");
         btnBack.setVisibility(View.GONE);
     }
 
@@ -60,11 +55,10 @@ public class UserFragment03 extends BaseFragment {
         return R.layout.fragment_user03;
     }
 
-    @OnClick({R.id.btn_right, R.id.btn_out,R.id.rl_my_song})
+    @OnClick({R.id.btn_right, R.id.btn_out, R.id.rl_my_song})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_right:
-//                startActivity(new Intent(mContext, ModifyInfoActivity.class));
                 break;
             case R.id.btn_out:
                 if (SpUtils.cleanUserBean(mContext)) {
@@ -72,7 +66,7 @@ public class UserFragment03 extends BaseFragment {
                 }
                 break;
             case R.id.rl_my_song:
-              // 我的作品
+                // 我的作品
                 Intent intent = new Intent(mContext, MySongActivity.class);
                 startActivity(intent);
                 break;

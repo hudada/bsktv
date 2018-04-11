@@ -17,6 +17,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
             android:name=".ui.UserMainActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <provider

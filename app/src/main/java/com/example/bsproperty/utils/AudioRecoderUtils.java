@@ -3,6 +3,7 @@ package com.example.bsproperty.utils;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TimeUtils;
 
@@ -106,9 +107,11 @@ public class AudioRecoderUtils {
             }
             return endTime - startTime;
         } else {
-            File file = new File(filePath);
-            if (file.exists()) {
-                file.delete();
+            if (!TextUtils.isEmpty(filePath)) {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    file.delete();
+                }
             }
             return 0L;
         }

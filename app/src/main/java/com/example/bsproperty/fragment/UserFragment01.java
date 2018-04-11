@@ -12,10 +12,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
 import com.example.bsproperty.adapter.BaseAdapter;
 import com.example.bsproperty.bean.ReplyBean;
 import com.example.bsproperty.bean.SongBean;
+import com.example.bsproperty.bean.SongListBean;
+import com.example.bsproperty.net.ApiManager;
+import com.example.bsproperty.net.BaseCallBack;
+import com.example.bsproperty.net.OkHttpTools;
 import com.example.bsproperty.ui.AccompanimentActivity;
 import com.example.bsproperty.ui.SongDetailActivity;
 
@@ -53,25 +58,16 @@ public class UserFragment01 extends BaseFragment {
 
     private void loadWebData() {
         mData.clear();
-        for (int i = 0; i < 5; i++) {
-            ArrayList<ReplyBean> re = new ArrayList<>();
-            SongBean songBean = new SongBean();
-            for (int u = 0; u < 8; u++) {
-                re.add(new ReplyBean());
-            }
-            songBean.setReplyBeans(re);
-            mData.add(songBean);
-        }
 
-//        OkHttpTools.sendGet(mContext, ApiManager.SHOP_LIST)
-//                .build()
-//                .execute(new BaseCallBack<ShopListBean>(mContext, ShopListBean.class) {
-//                    @Override
-//                    public void onResponse(ShopListBean shopListBean) {
-//                        mData = shopListBean.getData();
-//                        adapter.notifyDataSetChanged(mData);
-//                    }
-//                });
+        OkHttpTools.sendGet(mContext, ApiManager.SONG_LIST)
+                .build()
+                .execute(new BaseCallBack<SongListBean>(mContext, SongListBean.class) {
+                    @Override
+                    public void onResponse(SongListBean songListBean) {
+                        mData = songListBean.getData();
+                        adapter.notifyDataSetChanged(mData);
+                    }
+                });
     }
 
     @Override
@@ -125,10 +121,9 @@ public class UserFragment01 extends BaseFragment {
 
         @Override
         public void initItemView(BaseViewHolder holder, SongBean songBean, int position) {
-//            holder.setText(R.id.tv_name, songBean.getSong_name());
-//            //TODO 都没转换的
-//            holder.setText(R.id.tv_total, "时间："+songBean.getSong_name());
-//            holder.setText(R.id.tv_username, "用户名："+songBean.getUserid());
+            holder.setText(R.id.tv_name, songBean.getName());
+            holder.setText(R.id.tv_total, "时间：" + MyApplication.formatTime.format(songBean.getLength()));
+            holder.setText(R.id.tv_username, "用户名：" + songBean.getUname());
         }
     }
 }

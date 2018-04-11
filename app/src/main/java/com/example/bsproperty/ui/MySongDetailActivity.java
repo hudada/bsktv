@@ -20,9 +20,14 @@ import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
 import com.example.bsproperty.adapter.BaseAdapter;
 import com.example.bsproperty.bean.ReplyBean;
+import com.example.bsproperty.bean.ReplyListBean;
 import com.example.bsproperty.bean.SongBean;
+import com.example.bsproperty.net.ApiManager;
+import com.example.bsproperty.net.BaseCallBack;
+import com.example.bsproperty.net.OkHttpTools;
 import com.example.bsproperty.utils.Player;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -50,6 +55,9 @@ public class MySongDetailActivity extends BaseActivity {
     @BindView(R.id.tv_total)
     TextView tvTotal;
 
+    @BindView(R.id.tv_like)
+    TextView tvLike;
+
     private ArrayList<ReplyBean> mdata = new ArrayList<>();
     private MySongDetailActivity.MyAdapter adapter;
     private SongBean shopBean;
@@ -57,10 +65,10 @@ public class MySongDetailActivity extends BaseActivity {
     private Player player;
     private int mProgress;
 
+    private SongBean mSong;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
-        tvTitle.setText("歌曲详情");
         btnRight.setVisibility(View.GONE);
         slList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -69,7 +77,6 @@ public class MySongDetailActivity extends BaseActivity {
             }
         });
         shopBean = (SongBean) getIntent().getSerializableExtra("data");
-        mdata = (ArrayList<ReplyBean>) shopBean.getReplyBeans();
         adapter = new MySongDetailActivity.MyAdapter(mContext, R.layout.item_reply, mdata);
         adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
             @Override
@@ -140,10 +147,41 @@ public class MySongDetailActivity extends BaseActivity {
 
     @Override
     protected void loadData() {
+        mSong = (SongBean) getIntent().getSerializableExtra("data");
+        tvTitle.setText(mSong.getName());
+        tvLike.setText("点赞数" + mSong.getLikeSum());
+        player = new Player(ApiManager.MP3_PATH + mSong.getAddr(), sbBar, new Player.OnPlayListener() {
+            @Override
+            public void onLoad(int duration) {
+                tvTotal.setText(MyApplication.formatTime.format(duration));
+            }
+
+            @Override
+            public void onProgress(int position) {
+                tvPro.setText(MyApplication.formatTime.format(position));
+            }
+
+            @Override
+            public void onCompletion() {
+                tvPro.setText("00:00");
+                sbBar.setProgress(0);
+            }
+        });
+
+        OkHttpTools.sendPost(mContext, ApiManager.COMMENT_LIST)
+                .addParams("sid", mSong.getId() + "")
+                .build()
+                .execute(new BaseCallBack<ReplyListBean>(mContext, ReplyListBean.class) {
+                    @Override
+                    public void onResponse(ReplyListBean replyListBean) {
+                        mdata = replyListBean.getData();
+                        adapter.notifyDataSetChanged(mdata);
+                    }
+                });
     }
 
 
-    @OnClick({R.id.btn_back, R.id.btn_right,R.id.btn_play})
+    @OnClick({R.id.btn_back, R.id.btn_right, R.id.btn_play})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_back:
@@ -163,10 +201,10 @@ public class MySongDetailActivity extends BaseActivity {
 
         @Override
         public void initItemView(BaseViewHolder holder, ReplyBean replyBean, int position) {
-//            SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-//            holder.setText(R.id.tv_name,"用户名："+replyBean.getUid());
-//            holder.setText(R.id.tv_name,"时间："+format.format(new Date(replyBean.getTime())));
-//            holder.setText(R.id.tv_name,"评论："+replyBean.getInfo());
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            holder.setText(R.id.tv_name, "用户名：" + replyBean.getUname());
+            holder.setText(R.id.tv_total, "时间：" + format.format(replyBean.getTime()));
+            holder.setText(R.id.tv_username, "评论：" + replyBean.getMsg());
 
         }
     }

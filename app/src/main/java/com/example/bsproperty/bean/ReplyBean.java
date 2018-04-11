@@ -7,49 +7,59 @@ import java.io.Serializable;
  */
 
 public class ReplyBean implements Serializable {
-    private long id;
-    private long sid;
-    private long uid;
-    private long time;
-    private String info;
+    private Long id;
+    private Long uid;
+    private Long sid;
+    private String msg;
+    private Long time;
 
-    public long getId() {
+    private String uname;
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public long getSid() {
-        return sid;
-    }
-
-    public void setSid(long sid) {
-        this.sid = sid;
-    }
-
-    public long getUid() {
+    public Long getUid() {
         return uid;
     }
 
-    public void setUid(long uid) {
+    public void setUid(Long uid) {
         this.uid = uid;
     }
 
-    public long getTime() {
+    public Long getSid() {
+        return sid;
+    }
+
+    public void setSid(Long sid) {
+        this.sid = sid;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
-    public String getInfo() {
-        return info;
+    public String getUname() {
+        return uname;
     }
 
-    public void setInfo(String info) {
-        this.info = info;
+    public void setUname(String uname) {
+        this.uname = uname;
     }
 }

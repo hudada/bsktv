@@ -9,13 +9,45 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:background="@color/text_9">
 
         <TextView
+            android:id="@+id/tv_pro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="播放器" />
+            android:text="00:00" />
+
+        <SeekBar
+            android:id="@+id/sb_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tv_total"
+            android:layout_toRightOf="@+id/tv_pro"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/tv_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="00:00" />
+
+        <Button
+            android:id="@+id/btn_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sb_bar"
+            android:text="播放" />
+
+        <Button
+            android:id="@+id/btn_like"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sb_bar"
+            android:text="已赞（522）" />
     </RelativeLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout

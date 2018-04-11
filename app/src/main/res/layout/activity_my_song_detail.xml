@@ -9,9 +9,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:background="@color/text_9"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:background="@color/text_9">
+        android:paddingRight="10dp">
 
         <TextView
             android:id="@+id/tv_pro"
@@ -40,6 +40,15 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/sb_bar"
             android:text="播放" />
+
+        <TextView
+            android:id="@+id/tv_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/sb_bar"
+            android:layout_marginTop="15dp"
+            android:text="点赞数522" />
     </RelativeLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
