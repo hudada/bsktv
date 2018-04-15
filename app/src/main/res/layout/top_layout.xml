@@ -4,14 +4,14 @@
     android:layout_height="50dp"
     android:background="@color/blue_bg">
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_back"
-        android:layout_width="80dp"
+        android:layout_width="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:layout_height="match_parent"
         android:background="@null"
-        android:text="返 回"
-        android:textColor="@color/white"
-        android:textSize="16sp" />
+        android:src="@drawable/ic_keyboard_arrow_left_white_36dp" />
 
     <TextView
         android:id="@+id/tv_title"
@@ -25,10 +25,10 @@
     <Button
         android:id="@+id/btn_right"
         android:layout_width="80dp"
-        android:visibility="gone"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:background="@null"
         android:textColor="@color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:visibility="gone" />
 </RelativeLayout>

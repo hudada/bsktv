@@ -18,8 +18,10 @@
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tb_bottom"
+        android:background="#000000"
+        android:alpha="0.6"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_weight="0"
         app:tabIndicatorHeight="0dp"></android.support.design.widget.TabLayout>
 </LinearLayout>

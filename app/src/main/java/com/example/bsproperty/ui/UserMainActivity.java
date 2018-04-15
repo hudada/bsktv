@@ -1,11 +1,16 @@
 package com.example.bsproperty.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
@@ -42,6 +47,16 @@ public class UserMainActivity extends BaseActivity {
     private String[] tabs = new String[]{
             "歌单", "关注", "我的"
     };
+    private int[] tabIcons = {
+            R.drawable.ic_home_grey_400_24dp,
+            R.drawable.ic_format_list_bulleted_grey_400_24dp,
+            R.drawable.ic_person_grey_400_24dp
+    };
+    private int[] tabIconsPressed = {
+            R.drawable.ic_home_white_24dp,
+            R.drawable.ic_format_list_bulleted_white_24dp,
+            R.drawable.ic_person_white_24dp
+    };
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -59,19 +74,64 @@ public class UserMainActivity extends BaseActivity {
 
         adapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
         vpContent.setAdapter(adapter);
-
         tbBottom.setTabMode(TabLayout.MODE_FIXED);
-        for (int i = 0; i < fragments.size(); i++) {
-            if (i == 0) {
-                tbBottom.addTab(tbBottom.newTab().setText(tabs[i]), true);
-            } else {
-                tbBottom.addTab(tbBottom.newTab().setText(tabs[i]), false);
-            }
-        }
         tbBottom.setupWithViewPager(vpContent);
 
+        for (int i = 0; i < fragments.size(); i++) {
+            tbBottom.getTabAt(i).setCustomView(getTabView(i));
+        }
+
+        tbBottom.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                changeTabSelect(tab);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                changeTabNormal(tab);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
+    public View getTabView(int position) {
+        View view = LayoutInflater.from(this).inflate(R.layout.tab_nav, null);
+        TextView txt_title = (TextView) view.findViewById(R.id.txt_title);
+        txt_title.setText(tabs[position]);
+        ImageView img_title = (ImageView) view.findViewById(R.id.img_title);
+        img_title.setImageResource(tabIcons[position]);
+
+        if (position == 0) {
+            txt_title.setTextColor(Color.WHITE);
+            img_title.setImageResource(tabIconsPressed[position]);
+        } else {
+            txt_title.setTextColor(getResources().getColor(R.color.tab_nav_grey));
+            img_title.setImageResource(tabIcons[position]);
+        }
+        return view;
+    }
+
+    private void changeTabSelect(TabLayout.Tab tab) {
+        View view = tab.getCustomView();
+        ImageView img_title = (ImageView) view.findViewById(R.id.img_title);
+        TextView txt_title = (TextView) view.findViewById(R.id.txt_title);
+        txt_title.setTextColor(Color.WHITE);
+        vpContent.setCurrentItem(tbBottom.getSelectedTabPosition());
+        img_title.setImageResource(tabIconsPressed[tbBottom.getSelectedTabPosition()]);
+    }
+
+    private void changeTabNormal(TabLayout.Tab tab) {
+        View view = tab.getCustomView();
+        ImageView img_title = (ImageView) view.findViewById(R.id.img_title);
+        TextView txt_title = (TextView) view.findViewById(R.id.txt_title);
+        txt_title.setTextColor(getResources().getColor(R.color.tab_nav_grey));
+        img_title.setImageResource(tabIcons[tbBottom.getSelectedTabPosition()]);
+    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLoginEvent(LoginEvent event) {

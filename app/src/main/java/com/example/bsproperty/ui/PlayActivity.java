@@ -4,40 +4,39 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
-import android.media.Image;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.bsproperty.MyApplication;
 import com.example.bsproperty.R;
 import com.example.bsproperty.adapter.BaseAdapter;
 import com.example.bsproperty.utils.AudioRecoderUtils;
 import com.example.bsproperty.utils.Player;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class PlayActivity extends BaseActivity {
 
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)
@@ -58,6 +57,7 @@ public class PlayActivity extends BaseActivity {
     private AudioRecoderUtils audioRecoderUtils;
     private boolean isStart;
     private MyAdapter adapter;
+    private String mPath;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -120,18 +120,8 @@ public class PlayActivity extends BaseActivity {
             }
 
             @Override
-            public void onStop(String filePath) {
-                Intent intent = new Intent(mContext, SubmitActivity.class);
-                intent.putExtra("path", filePath);
-                String name = file.getName();
-                try {
-                    name = file.getName().split("\\.")[0];
-                } catch (Exception e) {
-
-                }
-                intent.putExtra("name", name);
-                startActivity(intent);
-                finish();
+            public void onStop(String filePath, long time) {
+                mPath = filePath;
             }
         });
 
@@ -179,10 +169,26 @@ public class PlayActivity extends BaseActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     isStart = false;
+
                                     player.stop();
                                     player.release();
                                     player = null;
+
                                     audioRecoderUtils.stopRecord(true);
+
+                                    Intent intent = new Intent(mContext, SubmitActivity.class);
+                                    intent.putExtra("path", mPath);
+                                    File file = (File) getIntent().getSerializableExtra("file");
+                                    String name = file.getName();
+                                    try {
+                                        name = file.getName().split("\\.")[0];
+                                    } catch (Exception e) {
+
+                                    }
+                                    intent.putExtra("back", file.getAbsolutePath());
+                                    intent.putExtra("name", name);
+                                    startActivity(intent);
+                                    finish();
                                 }
                             })
                             .setNegativeButton("取消", null)
@@ -193,7 +199,7 @@ public class PlayActivity extends BaseActivity {
                 break;
             case R.id.btn_play:
                 isStart = true;
-                player.play();
+                player.play(true);
                 audioRecoderUtils.startRecord();
                 btnPlay.setVisibility(View.INVISIBLE);
                 break;

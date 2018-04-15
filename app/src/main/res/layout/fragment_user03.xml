@@ -8,8 +8,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        >
+        android:layout_height="50dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -39,7 +38,7 @@
         android:id="@+id/rl_my_song"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-       >
+        android:background="@drawable/btn_ripple">
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,16 +47,16 @@
             android:layout_marginLeft="10dp"
             android:text="我的作品" />
 
-        <TextView
+        <ImageButton
             android:id="@+id/tv_addr"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="100dp"
-            android:gravity="right"
             android:layout_marginRight="10dp"
             android:background="@null"
-            android:text=">" />
+            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
 
         <View
             android:layout_width="match_parent"

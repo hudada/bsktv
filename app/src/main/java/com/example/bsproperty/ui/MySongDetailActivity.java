@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -37,7 +39,7 @@ public class MySongDetailActivity extends BaseActivity {
 
 
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)
@@ -49,7 +51,7 @@ public class MySongDetailActivity extends BaseActivity {
     @BindView(R.id.sb_bar)
     SeekBar sbBar;
     @BindView(R.id.btn_play)
-    Button btnPlay;
+    ImageButton btnPlay;
     @BindView(R.id.tv_pro)
     TextView tvPro;
     @BindView(R.id.tv_total)
@@ -63,9 +65,12 @@ public class MySongDetailActivity extends BaseActivity {
     private SongBean shopBean;
     private int mPosition;
     private Player player;
+    private Player player1;
     private int mProgress;
+    private boolean isPlay;
 
     private SongBean mSong;
+    private Handler handler = new Handler();
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -90,8 +95,14 @@ public class MySongDetailActivity extends BaseActivity {
         sbBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mProgress = progress * player.mediaPlayer.getDuration()
+                mProgress = progress * player1.mediaPlayer.getDuration()
                         / seekBar.getMax();
+                try {
+                    mProgress = progress * player.mediaPlayer.getDuration()
+                            / seekBar.getMax();
+                } catch (Exception e) {
+
+                }
             }
 
             @Override
@@ -101,33 +112,15 @@ public class MySongDetailActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                player.mediaPlayer.seekTo(mProgress);
+                player1.mediaPlayer.seekTo(mProgress);
+                try {
+                    player.mediaPlayer.seekTo(mProgress);
+                } catch (Exception e) {
+
+                }
             }
         });
 
-        try {
-            AssetManager assetManager = this.getAssets();
-            AssetFileDescriptor afd = assetManager.openFd("test.mp3");
-            player = new Player(afd, sbBar, new Player.OnPlayListener() {
-                @Override
-                public void onLoad(int duration) {
-                    tvTotal.setText(MyApplication.formatTime.format(duration));
-                }
-
-                @Override
-                public void onProgress(int position) {
-                    tvPro.setText(MyApplication.formatTime.format(position));
-                }
-
-                @Override
-                public void onCompletion() {
-                    tvPro.setText("00:00");
-                    sbBar.setProgress(0);
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -137,6 +130,11 @@ public class MySongDetailActivity extends BaseActivity {
             player.stop();
             player.release();
             player = null;
+        }
+        if (player1 != null) {
+            player1.stop();
+            player1.release();
+            player1 = null;
         }
     }
 
@@ -149,8 +147,21 @@ public class MySongDetailActivity extends BaseActivity {
     protected void loadData() {
         mSong = (SongBean) getIntent().getSerializableExtra("data");
         tvTitle.setText(mSong.getName());
-        tvLike.setText("点赞数" + mSong.getLikeSum());
-        player = new Player(ApiManager.MP3_PATH + mSong.getAddr(), sbBar, new Player.OnPlayListener() {
+        tvLike.setText(mSong.getLikeSum() + "");
+        player = new Player(ApiManager.MP3_PATH + mSong.getAddr(), null, new Player.OnPlayListener() {
+            @Override
+            public void onLoad(int duration) {
+            }
+
+            @Override
+            public void onProgress(int position) {
+            }
+
+            @Override
+            public void onCompletion() {
+            }
+        });
+        player1 = new Player(ApiManager.MP3_PATH + mSong.getAddrBack(), sbBar, new Player.OnPlayListener() {
             @Override
             public void onLoad(int duration) {
                 tvTotal.setText(MyApplication.formatTime.format(duration));
@@ -188,7 +199,17 @@ public class MySongDetailActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.btn_play:
-                player.play();
+                if (isPlay) {
+                    isPlay = false;
+                    player.pause();
+                    player1.pause();
+                    btnPlay.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
+                } else {
+                    isPlay = true;
+                    player.play(true);
+                    player1.play(false);
+                    btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp);
+                }
                 break;
         }
     }

@@ -5,7 +5,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.TimeUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +89,7 @@ public class AudioRecoderUtils {
                 mMediaRecorder.release();
                 mMediaRecorder = null;
 
-                audioStatusUpdateListener.onStop(filePath);
+                audioStatusUpdateListener.onStop(filePath,endTime - startTime);
                 filePath = "";
 
             } catch (RuntimeException e) {
@@ -188,8 +187,9 @@ public class AudioRecoderUtils {
          * 停止录音
          *
          * @param filePath 保存路径
+         * @param time
          */
-        public void onStop(String filePath);
+        public void onStop(String filePath, long time);
     }
 
 }

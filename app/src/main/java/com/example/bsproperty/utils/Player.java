@@ -80,7 +80,7 @@ public class Player implements MediaPlayer.OnBufferingUpdateListener,
         public void run() {
             if (mediaPlayer == null)
                 return;
-            if (mediaPlayer.isPlaying() && skbProgress.isPressed() == false) {
+            if (mediaPlayer.isPlaying() && skbProgress != null && skbProgress.isPressed() == false) {
                 handleProgress.sendEmptyMessage(0);
             }
         }
@@ -91,7 +91,7 @@ public class Player implements MediaPlayer.OnBufferingUpdateListener,
             int position = mediaPlayer.getCurrentPosition();
             int duration = mediaPlayer.getDuration();
             onPlayListener.onProgress(position);
-            if (duration > 0) {
+            if (duration > 0 && skbProgress != null) {
                 long pos = skbProgress.getMax() * position / duration;
                 skbProgress.setProgress((int) pos);
             }
@@ -102,9 +102,15 @@ public class Player implements MediaPlayer.OnBufferingUpdateListener,
     /**
      * 播放
      */
-    public void play() {
+    public void play(boolean flag) {
         try {
             if (!mediaPlayer.isPlaying()) {
+                if (flag) {
+                    mediaPlayer.setVolume(1.0f, 1.0f);
+                } else {
+                    mediaPlayer.setVolume(0.5f, 0.5f);
+                }
+
                 mediaPlayer.start();
             }
         } catch (Exception e) {
@@ -119,7 +125,7 @@ public class Player implements MediaPlayer.OnBufferingUpdateListener,
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(0);// 从开始位置开始播放音乐
         } else {
-            play();
+            play(true);
         }
     }
 
@@ -158,10 +164,12 @@ public class Player implements MediaPlayer.OnBufferingUpdateListener,
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        skbProgress.setSecondaryProgress(percent);
-        int currentProgress = skbProgress.getMax()
-                * mediaPlayer.getCurrentPosition() / mediaPlayer.getDuration();
-        Log.e(currentProgress + "% play", percent + "% buffer");
+        if (skbProgress != null) {
+            skbProgress.setSecondaryProgress(percent);
+            int currentProgress = skbProgress.getMax()
+                    * mediaPlayer.getCurrentPosition() / mediaPlayer.getDuration();
+            Log.e(currentProgress + "% play", percent + "% buffer");
+        }
     }
 
     @Override

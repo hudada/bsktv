@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -45,7 +46,7 @@ import okhttp3.Request;
 public class AccompanimentActivity extends BaseActivity {
 
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)
@@ -94,7 +95,8 @@ public class AccompanimentActivity extends BaseActivity {
                     DenstityUtils.dp2px(mContext, 50));
             ((TextView) view.findViewById(R.id.tv_name)).setText(file1.getName());
 
-            ((Button) view.findViewById(R.id.btn_act)).setText("演唱");
+            ((ImageButton) view.findViewById(R.id.btn_act))
+                    .setImageResource(R.drawable.ic_play_arrow_grey_400_24dp);
             view.findViewById(R.id.btn_act).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -133,7 +135,8 @@ public class AccompanimentActivity extends BaseActivity {
                                     DenstityUtils.dp2px(mContext, 50));
                             ((TextView) view.findViewById(R.id.tv_name)).setText(musicBean.getName());
                             ((TextView) view.findViewById(R.id.tv_time)).setText("时长：" + MyApplication.formatTime.format(musicBean.getLength()));
-                            ((Button) view.findViewById(R.id.btn_act)).setText("下载");
+                            ((ImageButton) view.findViewById(R.id.btn_act))
+                                    .setImageResource(R.drawable.ic_file_download_grey_400_24dp);
                             view.findViewById(R.id.btn_act).setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -166,7 +169,12 @@ public class AccompanimentActivity extends BaseActivity {
                     @Override
                     public void onResponse(MusicObjBean musicObjBean) {
                         Intent intent = new Intent(mContext, PlayActivity.class);
-                        intent.putExtra("word", musicObjBean.getData().getWord());
+                        try {
+                            intent.putExtra("word", musicObjBean.getData().getWord());
+                        } catch (Exception e) {
+                            intent.putExtra("word", "暂无歌词");
+                        }
+
                         intent.putExtra("file", selectFile);
                         startActivity(intent);
                     }

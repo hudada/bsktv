@@ -8,8 +8,10 @@ import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ import com.example.bsproperty.net.ApiManager;
 import com.example.bsproperty.net.BaseCallBack;
 import com.example.bsproperty.net.OkHttpTools;
 import com.example.bsproperty.utils.Player;
+import com.zhy.http.okhttp.OkHttpUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,7 +35,7 @@ import butterknife.OnClick;
 public class SubmitActivity extends BaseActivity {
 
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)
@@ -47,10 +50,13 @@ public class SubmitActivity extends BaseActivity {
     Button btnPlay;
 
     private Player player;
+    private Player player1;
     private int mProgress;
     private String mPath;
+    private String mBack;
     private MediaPlayer mediaPlayer;
     private int length;
+    private Handler handler = new Handler();
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -74,8 +80,25 @@ public class SubmitActivity extends BaseActivity {
         });
 
         mPath = getIntent().getStringExtra("path");
+        mBack = getIntent().getStringExtra("back");
         try {
-            player = new Player(mPath, sbBar, new Player.OnPlayListener() {
+            player = new Player(mPath, null, new Player.OnPlayListener() {
+                @Override
+                public void onLoad(int duration) {
+
+                }
+
+                @Override
+                public void onProgress(int position) {
+
+                }
+
+                @Override
+                public void onCompletion() {
+
+                }
+            });
+            player1 = new Player(mBack, sbBar, new Player.OnPlayListener() {
                 @Override
                 public void onLoad(int duration) {
                     length = duration;
@@ -93,7 +116,16 @@ public class SubmitActivity extends BaseActivity {
                     sbBar.setProgress(0);
                 }
             });
-            player.play();
+            player.play(true);
+            player1.play(false);
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    player1.play();
+//                }
+//            }, 100);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -108,6 +140,12 @@ public class SubmitActivity extends BaseActivity {
             player.stop();
             player.release();
             player = null;
+        }
+
+        if (player1 != null) {
+            player1.stop();
+            player1.release();
+            player1 = null;
         }
     }
 
@@ -140,8 +178,13 @@ public class SubmitActivity extends BaseActivity {
                         .show();
                 break;
             case R.id.btn_play:
+                showProgress(mContext);
                 File file = new File(mPath);
-                OkHttpTools.postFile(mContext, ApiManager.SONG_ADD, "file", file)
+                File back = new File(mBack);
+                OkHttpUtils.post()
+                        .addFile("file", file.getName(), file)
+                        .addFile("file1", back.getName(), back)
+                        .url(ApiManager.SONG_ADD)
                         .addParams("uid", MyApplication.getInstance().getUserBean().getId() + "")
                         .addParams("name", getIntent().getStringExtra("name"))
                         .addParams("length", length + "")

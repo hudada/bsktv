@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.bsproperty.MyApplication;
@@ -37,7 +38,7 @@ import butterknife.Unbinder;
 
 public class UserFragment01 extends BaseFragment {
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)

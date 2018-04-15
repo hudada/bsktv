@@ -2,9 +2,8 @@ package com.example.bsproperty.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +11,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -33,12 +35,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class SongDetailActivity extends BaseActivity {
 
     @BindView(R.id.btn_back)
-    Button btnBack;
+    ImageButton btnBack;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.btn_right)
@@ -54,29 +57,36 @@ public class SongDetailActivity extends BaseActivity {
     @BindView(R.id.sb_bar)
     SeekBar sbBar;
     @BindView(R.id.btn_play)
-    Button btnPlay;
+    ImageButton btnPlay;
     @BindView(R.id.tv_pro)
     TextView tvPro;
     @BindView(R.id.tv_total)
     TextView tvTotal;
-    @BindView(R.id.btn_like)
-    Button btnLike;
+    @BindView(R.id.iv_like)
+    ImageView ivLike;
+    @BindView(R.id.tv_like)
+    TextView tvLike;
+    @BindView(R.id.ll_like_click)
+    LinearLayout llLikeClick;
 
     private ArrayList<ReplyBean> mdata = new ArrayList<>();
     private MyAdapter adapter;
     private SongBean shopBean;
     private int mPosition;
     private Player player;
+    private Player player1;
     private int mProgress;
 
     private SongBean mSong;
     private boolean isFollow;
     private boolean isLike;
+    private boolean isPlay;
     private int likeCount;
+    private Handler handler = new Handler();
 
     @Override
     protected void initView(Bundle savedInstanceState) {
-        btnLike.setEnabled(false);
+        llLikeClick.setEnabled(false);
         slList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -97,8 +107,14 @@ public class SongDetailActivity extends BaseActivity {
         sbBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mProgress = progress * player.mediaPlayer.getDuration()
+                mProgress = progress * player1.mediaPlayer.getDuration()
                         / seekBar.getMax();
+                try {
+                    mProgress = progress * player.mediaPlayer.getDuration()
+                            / seekBar.getMax();
+                } catch (Exception e) {
+
+                }
             }
 
             @Override
@@ -108,7 +124,12 @@ public class SongDetailActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                player.mediaPlayer.seekTo(mProgress);
+                player1.mediaPlayer.seekTo(mProgress);
+                try {
+                    player.mediaPlayer.seekTo(mProgress);
+                } catch (Exception e) {
+
+                }
             }
         });
 
@@ -122,6 +143,11 @@ public class SongDetailActivity extends BaseActivity {
             player.release();
             player = null;
         }
+        if (player1 != null) {
+            player1.stop();
+            player1.release();
+            player1 = null;
+        }
     }
 
     @Override
@@ -134,7 +160,20 @@ public class SongDetailActivity extends BaseActivity {
         mSong = (SongBean) getIntent().getSerializableExtra("data");
         likeCount = mSong.getLikeSum();
         tvTitle.setText(mSong.getName());
-        player = new Player(ApiManager.MP3_PATH + mSong.getAddr(), sbBar, new Player.OnPlayListener() {
+        player = new Player(ApiManager.MP3_PATH + mSong.getAddr(), null, new Player.OnPlayListener() {
+            @Override
+            public void onLoad(int duration) {
+            }
+
+            @Override
+            public void onProgress(int position) {
+            }
+
+            @Override
+            public void onCompletion() {
+            }
+        });
+        player1 = new Player(ApiManager.MP3_PATH + mSong.getAddrBack(), sbBar, new Player.OnPlayListener() {
             @Override
             public void onLoad(int duration) {
                 tvTotal.setText(MyApplication.formatTime.format(duration));
@@ -180,13 +219,14 @@ public class SongDetailActivity extends BaseActivity {
                     @Override
                     public void onResponse(ZanObjBean zanObjBean) {
                         if (zanObjBean.getData() == null) {
-                            btnLike.setText("赞（" + mSong.getLikeSum() + "）");
+                            ivLike.setImageResource(R.drawable.ic_favorite_white_24dp);
                             isLike = false;
                         } else {
-                            btnLike.setText("已赞（" + mSong.getLikeSum() + "）");
+                            ivLike.setImageResource(R.drawable.ic_favorite_red_300_24dp);
                             isLike = true;
                         }
-                        btnLike.setEnabled(true);
+                        tvLike.setText(mSong.getLikeSum() + "");
+                        llLikeClick.setEnabled(true);
                     }
                 });
 
@@ -209,7 +249,8 @@ public class SongDetailActivity extends BaseActivity {
     }
 
 
-    @OnClick({R.id.btn_back, R.id.btn_right, R.id.btn_re, R.id.btn_play, R.id.btn_like})
+    @OnClick({R.id.btn_back, R.id.btn_right, R.id.btn_re, R.id.btn_play,
+            R.id.ll_like_click})
     public void onViewClicked(View view) {
         long uid = MyApplication.getInstance().getUserBean().getId();
         long likeId = mSong.getUid();
@@ -237,9 +278,20 @@ public class SongDetailActivity extends BaseActivity {
                         });
                 break;
             case R.id.btn_play:
-                player.play();
+                if (isPlay){
+                    isPlay = false;
+                    player.pause();
+                    player1.pause();
+                    btnPlay.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
+                }else{
+                    isPlay = true;
+                    player.play(true);
+                    player1.play(false);
+                    btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp);
+                }
+
                 break;
-            case R.id.btn_like:
+            case R.id.ll_like_click:
                 if (isLike) {
                     OkHttpTools.sendPost(mContext, ApiManager.SONG_DOLIKE)
                             .addParams("id", uid + "")
@@ -250,7 +302,8 @@ public class SongDetailActivity extends BaseActivity {
                                 @Override
                                 public void onResponse(BaseResponse baseResponse) {
                                     likeCount--;
-                                    btnLike.setText("赞（" + likeCount + "）");
+                                    ivLike.setImageResource(R.drawable.ic_favorite_white_24dp);
+                                    tvLike.setText(likeCount + "");
                                     isLike = false;
                                 }
                             });
@@ -264,7 +317,8 @@ public class SongDetailActivity extends BaseActivity {
                                 @Override
                                 public void onResponse(BaseResponse baseResponse) {
                                     likeCount++;
-                                    btnLike.setText("已赞（" + likeCount + "）");
+                                    ivLike.setImageResource(R.drawable.ic_favorite_red_300_24dp);
+                                    tvLike.setText(likeCount + "");
                                     isLike = true;
                                 }
                             });

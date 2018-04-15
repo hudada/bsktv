@@ -7,7 +7,7 @@ package com.example.bsproperty.net;
 public class ApiManager {
 
     private static final String HTTP = "http://";
-    private static final String IP = "192.168.55.102";
+    private static final String IP = "192.168.55.103";
     private static final String PROT = ":8080";
     private static final String HOST = HTTP + IP + PROT;
     private static final String API = "/api";

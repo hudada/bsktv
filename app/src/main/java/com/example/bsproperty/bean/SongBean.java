@@ -10,6 +10,7 @@ public class SongBean implements Serializable {
     private Long uid;
     private String name;
     private String addr;
+    private String addrBack;
     private Long length;
     private int likeSum;  //赞
     private String uname;
@@ -77,5 +78,13 @@ public class SongBean implements Serializable {
 
     public void setLike(boolean like) {
         isLike = like;
+    }
+
+    public String getAddrBack() {
+        return addrBack;
+    }
+
+    public void setAddrBack(String addrBack) {
+        this.addrBack = addrBack;
     }
 }
